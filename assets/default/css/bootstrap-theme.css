@@ -7,9 +7,66 @@ h1 {
 h2 {
   color: #ff9016;
 }
+
+nav.navbar.navbar-inverse{
+    border-radius: 0px;
+	max-width: 1290px;
+	min-width: 320px;
+
+}
 h3 {  
   color: #ff9016;
 }
+
+.navbar-fixed-top, .navbar-fixed-bottom {
+  position: static; /* this can also be static */
+}
+div.navbar-header>a.navbar-left>img.img-responsive{
+max-height: 65px;
+  max-width: 380px;
+  width: auto;
+  height: auto;
+  vertical-align: middle;	
+	
+}
+
+.navbar-left
+{
+  float: left;
+  min-height: 75px;
+  padding-top: 7px;
+ /* padding-right: 15px;
+  padding-bottom: 0px;
+  padding-left: 15px;
+  font-size: 18px;
+  line-height: 20px;*/
+}
+
+.white, .white a {
+  color: #fff;
+}
+
+.navbar-toggle span {
+    border: solid #ffffff 1px;
+}
+.wrapper {
+	left:0;
+    right:0;
+ 	max-width: 1290px;
+    background: #F5F5F5;
+	min-height: 100%;
+	height: auto !important; 
+	height: 100%;
+	margin-left: auto;
+	margin-right: auto;
+	margin: 0 auto -80px;
+
+	
+}
+.footer, .push {
+	height: 80px; /* .push must be the same height as .footer */
+		
+	}
 body {
   background-color: #3D3D3D;
 }
