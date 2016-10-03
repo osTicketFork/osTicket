@@ -32,6 +32,7 @@ class Filter {
             array('reply-to'  =>    /* @trans */ 'Reply-To Email',
                 'reply-to-name' =>  /* @trans */ 'Reply-To Name',
                 'addressee' =>      /* @trans */ 'Addressee (To and Cc)',
+                'headers' =>        /* @trans */ 'Headers',
             ),
             200
         ),
@@ -238,9 +239,9 @@ class Filter {
      *   headers - array of email headers
      *   emailId - osTicket system email id
      */
-    function matches($what) {
+    function matches($info) {
 
-        if(!$what || !is_array($what)) return false;
+        if(!$info || !is_array($info)) return false;
 
         $how = array(
             # how => array(function, null or === this, null or !== this)
@@ -254,32 +255,46 @@ class Filter {
             'not_match' => array('pregMatchB', null, 0),
         );
 
-        $match = false;
         # Respect configured filter email-id
         if ($this->getEmailId()
                 && !strcasecmp($this->getTarget(), 'Email')
-                && $this->getEmailId() != $what['emailId'])
+                && $this->getEmailId() != $info['emailId'])
             return false;
 
         foreach ($this->getRules() as $rule) {
+			$match = false;
             if (!isset($how[$rule['h']])) continue;
             list($func, $pos, $neg) = $how[$rule['h']];
-
-            $result = call_user_func($func, $what[$rule['w']], $rule['v']);
-            if (($pos === null && $result !== $neg) or ($result === $pos)) {
-                # Match.
-                $match = true;
-                if (!$this->matchAllRules()) break;
-            } else {
-                # No match. Continue?
-                if ($this->matchAllRules()) {
-                    $match = false;
-                    break;
-                }
-            }
+			
+			if ($rule['w'] == 'header') {
+				$isHeader 	= false;
+				$what		= $info[$rule['w']];
+			} else {
+				$isHeader 	= false;
+				$what		= Array($info[$rule['w']]);
+			}
+			$how_many	= count($what);
+			
+			foreach ($what as $k=>$v) {
+				--$how_many;
+				$result = call_user_func($func
+										, $isHeader ? "$k: $v" : $v
+										, $rule['v']);
+				if (($pos === null && $result !== $neg && $how_many == 0) or ($result === $pos)) {
+					# Match.
+					$match = true;
+					break;
+				}
+			}
+			
+			if ($this->matchAllRules())
+				if (!$match) return false;
+			elseif ($match) {
+				return true;
+			}
         }
 
-        return $match;
+        return false;
     }
 
     function getActions() {
