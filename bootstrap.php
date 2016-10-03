@@ -331,7 +331,7 @@ if(!defined('PATH_SEPARATOR')){
 }
 
 //Set include paths. Overwrite the default paths.
-ini_set('include_path', './'.PATH_SEPARATOR.INCLUDE_DIR);
+ini_set('include_path', './'.PATH_SEPARATOR.INCLUDE_DIR.PATH_SEPARATOR.ROOT_DIR.'vendor/pear-pear.php.net/PEAR');
 
 require(INCLUDE_DIR.'class.osticket.php');
 require(INCLUDE_DIR.'class.misc.php');
