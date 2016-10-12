@@ -122,8 +122,11 @@ class Net_Socket extends PEAR
 
         if (!$addr) {
             return $this->raiseError('$addr cannot be empty');
-        } else {
+        } elseif (strspn($addr, '.0123456789') == strlen($addr) ||
+                  strstr($addr, '/') !== false) {
             $this->addr = $addr;
+        } else {
+            $this->addr = @gethostbyname($addr);
         }
 
         $this->port = $port % 65536;
