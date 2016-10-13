@@ -524,7 +524,7 @@ class Mailer {
             $key = sprintf("%s:%s:%s", $smtp['host'], $smtp['port'],
                 $smtp['username']);
             if (!isset($smtp_connections[$key])) {
-                $mail = mail::factory('smtp', array(
+                $mail = Mail::factory('smtp', array(
                     'host' => $smtp['host'],
                     'port' => $smtp['port'],
                     'auth' => $smtp['auth'],
@@ -559,7 +559,7 @@ class Mailer {
         $args = array();
         if ($this->getEmail())
             $args = array('-f '.$this->getEmail()->getEmail());
-        $mail = mail::factory('mail', $args);
+        $mail = Mail::factory('mail', $args);
         // Ensure the To: header is properly encoded.
         $to = $headers['To'];
         $result = $mail->send($to, $headers, $body);
