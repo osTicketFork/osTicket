@@ -355,7 +355,7 @@ class Email extends VerySimpleModel {
 
         if(!$errors && $vars['smtp_active']) { //Check SMTP login only.
             require_once 'Mail.php'; // PEAR Mail package
-            $smtp = mail::factory('smtp',
+            $smtp = Mail::factory('smtp',
                     array ('host' => $vars['smtp_host'],
                            'port' => $vars['smtp_port'],
                            'auth' => (bool) $vars['smtp_auth'],
