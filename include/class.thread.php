@@ -1223,21 +1223,27 @@ implements TemplateVariable {
                 // Required `#` followed by one or more of
                 //      punctuation (-) then letters, numbers, and symbols
                 // (Try not to match closing punctuation (`]`) in [#12345])
-                && preg_match("/#((\p{P}*[^\p{C}\p{Z}\p{P}]+)+)/u", $subject, $match)
-                //Lookup by ticket number
-                && ($ticket = Ticket::lookupByNumber($match[1]))
+                && preg_match_all('/\[#([^\]]+)\]/u', $subject, $matches)
                 //Lookup the user using the email address
-                && ($user = User::lookup(array('emails__address' => $mailinfo['email'])))) {
-            //We have a valid ticket and user
-            if ($ticket->getUserId() == $user->getId() //owner
-                    ||  ($c = Collaborator::lookup( // check if collaborator
-                            array('user_id' => $user->getId(),
-                                  'thread_id' => $ticket->getThreadId())))) {
+                && ($user = User::lookup(array('emails__address' => $mailinfo['email']))))
+                {
+                    foreach ($matches[1] as $match)
+                    {
+                        if (
+                            //Lookup by ticket number
+                            ($ticket = Ticket::lookupByNumber($match))
 
-                $mailinfo['userId'] = $user->getId();
-                return $ticket->getLastMessage();
-            }
-        }
+                            //We have a valid ticket and user
+                            &&  (   $ticket->getUserId() == $user->getId() //owner
+                                ||  ($c = Collaborator::lookup( // check if collaborator
+                                            array('user_id' => $user->getId(),
+                                                  'thread_id' => $ticket->getThreadId())))))
+                        {
+                            $mailinfo['userId'] = $user->getId();
+                            return $ticket->getLastMessage();
+                        }
+                    }
+               }
 
         return null;
     }
