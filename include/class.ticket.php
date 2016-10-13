@@ -1619,7 +1619,8 @@ implements RestrictedAccess, Threadable {
             if ($message->getEmailMessageId()) {
                 $options += array(
                         'inreplyto' => $message->getEmailMessageId(),
-                        'references' => $message->getEmailReferences()
+                        'references' => $message->getEmailReferences(),
+                        'message' => $message
                         );
             }
 
