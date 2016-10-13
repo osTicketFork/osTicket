@@ -76,6 +76,24 @@ class Mail_Parse {
             'decoder' => $decoder,
         );
 
+        // Special case for multipart/signed messages
+        if (@$this->struct->parts['msg_body'])
+        {
+            $info['sig_hdr']    = &$this->struct->parts['sig_hdr'];
+            $info['sig_body']   = &$this->struct->parts['sig_body'];
+             
+            // unless mimeDecode get's patched, we need to do this
+            if (@$this->struct->parts['sig_parts'])
+            {
+                $info['body']   = &$this->struct->parts['sig_parts'];
+            }
+            else
+            {
+                list($part_header, $part_body)  = $decoder->_splitBodyHeader($this->struct->parts['msg_body']);
+                $info['body']                   = $decoder->_decode($part_header, $part_body)->parts;
+            }
+        }
+
         // Allow signal handlers to interact with the processing
         Signal::send('mail.decoded', $decoder, $info);
 
