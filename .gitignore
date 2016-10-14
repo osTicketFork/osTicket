@@ -4,6 +4,7 @@ include/ost-config.php
 api/error_log
 scp/error_log
 setup/cli/modules/importer
+Thumbs.db
 *.sw[a-z]
 .DS_Store
 .vagrant
