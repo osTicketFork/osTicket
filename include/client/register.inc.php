@@ -23,40 +23,33 @@ $info = Format::htmlchars(($errors && $_POST)?$_POST:$info);
 	</p>
 	</div>
 </div>
-<form class="form-group" action="account.php" method="post">
+<form class="form-horizontal" action="account.php" method="post">
   <?php csrf_token(); ?>
   <input type="hidden" name="do" value="<?php echo Format::htmlchars($_REQUEST['do']
     ?: ($info['backend'] ? 'import' :'create')); ?>" />
-<table width="800" class="padded">
-<tbody>
 <?php
     $cf = $user_form ?: UserForm::getInstance();
     $cf->render(false, false, array('mode' => 'create'));
 ?>
-<tr>
-    <td colspan="2">
-        <div><h3><?php echo __('Preferences'); ?></h3>
-        </div>
-    </td>
-</tr>
-    <tr>
-        <td width="180">
-           <label> <?php echo __('Time Zone');?>:</label>
-        </td>
-        <td>
+
+<h3><?php echo __('Preferences'); ?></h3>
+
+      <div class="form-group">
+        <label class="control-label col-sm-2"><?php echo __('Time Zone');?>:</label>
+        <div class="col-sm-10">
             <?php
             $TZ_NAME = 'timezone';
             $TZ_TIMEZONE = $info['timezone'];
             include INCLUDE_DIR.'staff/templates/timezone.tmpl.php'; ?>
             <div class="error"><?php echo $errors['timezone']; ?></div>
-        </td>
-    </tr>
-<tr>
-    <td colspan=2">
-        <div><h3><?php echo __('Access Credentials'); ?></h3></div>
-    </td>
-</tr>
+      </div>
+</div>
+
+        <h3><?php echo __('Access Credentials'); ?></h3>
+
 <?php if ($info['backend']) { ?>
+<table width="800" class="padded">
+<tbody>
 <tr>
     <td width="180">
         <?php echo __('Login With'); ?>:
@@ -72,29 +65,26 @@ $info = Format::htmlchars(($errors && $_POST)?$_POST:$info);
 } ?>
     </td>
 </tr>
-<?php } else { ?>
 </tbody>
 </table>
-<div class="row">
-	<div class="col-md-4">
-         <label> <?php echo __('Create a Password'); ?>:</label>
-
-        <input class="form-control" type="password" size="18" name="passwd1" value="<?php echo $info['passwd1']; ?>">
-        &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd1']; ?></span>
+<?php } else { ?>
+<div class="form-group">
+         <label class="control-label col-sm-4"> <?php echo __('Create a Password'); ?>:</label>
+         <div class="col-sm-8">
+         <input class="form-control" type="password" size="18" name="passwd1" value="<?php echo $info['passwd1']; ?>">
+         <span class="error">&nbsp;<?php echo $errors['passwd1']; ?></span>
 	</div>
 </div>
-<div class="row">
-	<div class="col-md-4"> 
-        <label><?php echo __('Confirm New Password'); ?>:</label>
-   
+<div class="form-group">
+        <label class="control-label col-sm-4"><?php echo __('Confirm New Password'); ?>:</label>
+         <div class="col-sm-8">
         <input class="form-control" type="password" size="18" name="passwd2" value="<?php echo $info['passwd2']; ?>">
-        &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd2']; ?></span>
+        <span class="error">&nbsp;<?php echo $errors['passwd2']; ?></span>
 	</div>
-	
 </div>
 <?php } ?>
 
-<p>
+<p class="buttons text-center">
     <input class="btn btn-success" type="submit" value="Register"/>
     <input class="btn btn-default" type="button" value="Cancel" onclick="javascript:
         window.location.href='index.php';"/>

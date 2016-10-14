@@ -49,13 +49,12 @@ if ($cfg && $cfg->isClientRegistrationEnabled()) {
     ?><div class="col-sm-2"><?php
     if (count($ext_bks)) echo '<hr style="width:70%"/>'; ?>
     <div>
-   <h4>If you are a Team Leader or Facilitator</h4>
+   <h4>I'm an agent</h4>
     <a href="<?php echo ROOT_PATH; ?>scp"><?php echo __('sign in here'); ?></a>
     
     </div>
 <?php } ?>
      
-    </div>
     </div>
 </div>
 </form>

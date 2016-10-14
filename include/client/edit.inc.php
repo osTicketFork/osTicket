@@ -4,24 +4,18 @@ if(!defined('OSTCLIENTINC') || !$thisclient || !$ticket || !$ticket->checkUserAc
 
 ?>
 <div class="row">
-<div class="page-title">
 <h1>
     <?php echo sprintf(__('Editing Ticket #%s'), $ticket->getNumber()); ?>
 </h1>
-</div>
-</div class="row"">
-<form action="tickets.php" method="post">
+<form action="tickets.php" class="form-horizontal" method="post">
     <?php echo csrf_token(); ?>
     <input type="hidden" name="a" value="edit"/>
     <input type="hidden" name="id" value="<?php echo Format::htmlchars($_REQUEST['id']); ?>"/>
-<table>
-    <tbody id="dynamic-form">
-    <?php if ($forms)
-        foreach ($forms as $form) {
-            $form->render(false);
-    } ?>
-    </tbody>
-</table>
+    <div id="dynamic-form">
+        <?php foreach ($forms as $form) {
+            include(CLIENTINC_DIR . 'templates/dynamic-form.tmpl.php');
+        } ?>
+    </div>
 <p>
     <input class="btn btn-success" type="submit" value="Update"/>
     <input class="btn btn-warning" type="reset" value="Reset"/>

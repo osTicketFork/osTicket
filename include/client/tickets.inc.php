@@ -49,16 +49,16 @@ if ($settings['status'])
     switch ($status) {
     default:
         $status = 'open';
-	case 'open':
+    case 'open':
     case 'closed':
-		$results_type = ($status == 'closed') ? __('All Closed Tickets') : __('All Open Tickets');
+        $results_type = ($status == 'closed') ? __('All Closed Tickets') : __('All Open Tickets');
         $tickets->filter(array('status__state' => $status));
         break;
 }
 
 
 if ($mine != 0){
-	$results_type = ($settings['my'] != 0 && $status == 'closed') ? __('My Closed Tickets') : __('My Open Tickets');
+    $results_type = ($settings['my'] != 0 && $status == 'closed') ? __('My Closed Tickets') : __('My Open Tickets');
 // Add visibility constraints
 $tickets->filter(Q::any(array(
     'user_id' => $thisclient->getId(),
@@ -94,7 +94,7 @@ if ($settings['status'])
         $status = 'open';
     case 'open':
     case 'closed':
-		$results_type = ($status == 'closed') ? __('Closed Tickets') : __('Open Tickets');
+        $results_type = ($status == 'closed') ? __('Closed Tickets') : __('Open Tickets');
         $basic_filter->filter(array('status__state' => $status));
         break;
 }
@@ -144,9 +144,9 @@ $pageNav->paginate($tickets);
 $showing =$total ? $pageNav->showing() : "";
 if(!$results_type)
 {
-	$results_type=ucfirst($status).' '.__('Suggestions');
+    $results_type=ucfirst($status).' '.__('Tickets');
 }
-$showing.=($status)?(' '.$results_type):' '.__('All Suggestions');
+$showing.=($status)?(' '.$results_type):' '.__('All Tickets');
 if($search)
     $showing=__('Search Results').": $showing";
 
@@ -159,7 +159,8 @@ $tickets->values(
 );
 
 ?>
-
+<!-- tickets.inc -->
+<div class="row">
 <form action="tickets.php" method="get" id="ticketSearchForm">
   <div class="row">
     <div class="col-xs-12">
@@ -169,12 +170,12 @@ $tickets->values(
         <span class="input-group-btn">
         <select name="topic_id" class="nowarn btn" onchange="javascript: this.form.submit(); ">
 
-            <option value="">&mdash; <?php echo __('All AI Teams');?> &mdash;</option>
+            <option value="">&mdash; <?php echo __('All Topics');?> &mdash;</option>
 
 <?php       foreach (Topic::getHelpTopics(true) as $id=>$name) {
                 $count = $thisclient->getNumTopicTickets($id);
                 //Show all topics (teams)
-				//if ($count == 0)
+                //if ($count == 0)
                 //    continue;
 ?>
                 <option value="<?php echo $id; ?>"
@@ -190,64 +191,55 @@ $tickets->values(
       </div>
    </div>
 </form>
+</row>
 <?php if ($settings['keywords'] || $settings['topic_id'] || $_REQUEST['sort']) { ?>
 <div style="margin-top:10px"><strong><a href="?clear" style="color:#777"><i class="icon-remove-circle"></i> <?php echo __('Clear all filters and sort'); ?></a></strong></div>
 <?php } ?>
 <div class="clearfix"></div>
 </div>
 <div class="row">
-    <div class="col-xs-6">
+<div class="display-table">
+    <div class="col-xs-6 display-cell-bottom">
         <h2>
             <a href="<?php echo Format::htmlchars($_SERVER['REQUEST_URI']); ?>"
                 ><i class="refresh icon-refresh"></i>
-
-            <?php echo __('Suggestions'); ?>
-
+            <?php echo __('Tickets'); ?>
             </a>
         </h2>
     </div>
-    <div class="col-xs-6">
-        <h2>
-            <div class="pull-right states"> 
-                    <small>
-					   <i class="icon-file-alt"></i>
+    <div class="col-xs-6 display-cell-bottom">
+	    <div class="list-group text-right" style="margin-top: 20px; margin-bottom: 10px;">
                     <a class="state <?php if ($mine != 0  && $status == 'open') echo 'active'; ?>"
                         href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'open', 'my' => '1')); ?>">
-                        <?php echo sprintf('%s (%d)', _P('ticket-status', 'My Open'), $thisclient->getNumOpenTickets()); ?>
-                    </a>
-                  
-                    <span style="color:lightgray">|</span>
-                   
-                    <i class="icon-file-text"></i>
+                        <small><span class="glyphicon glyphicon-tag white"></span><?php
+                        echo sprintf('%s <span class="badge">%d</span>', str_replace(" ", "&nbsp;", _P('ticket-status', 'My Open')), $thisclient->getNumOpenTickets());
+                        ?></small></a>
                     <a class="state <?php if ($mine != 0  && $status == 'closed') echo 'active'; ?>"
                         href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'closed', 'my' => '1')); ?>">
-                        <?php echo sprintf('%s (%d)', __('My Closed'), $thisclient->getNumClosedTickets()); ?>
-                    </a>
-					<span style="color:lightgray">|</span>
-                    <i class="icon-file-alt"></i>
+                        <small><span class="glyphicon glyphicon-tag"></span><?php
+                        echo sprintf('%s <span class="badge">%d</span>', str_replace(" ", "&nbsp;", __('My Closed')), $thisclient->getNumClosedTickets());
+                        ?></small></a>
                     <a class="state <?php if ( $status == 'open' && $mine != 1) echo 'active'; ?>"
                         href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'open', 'my' => '0')); ?>">
-                        <?php echo sprintf('%s', _P('ticket-status', 'All Open'), $thisclient->getNumOpenTickets()); ?>
-                    </a>
-                    
-                    <span style="color:lightgray">|</span>
-                   
-                    <i class="icon-file-text"></i>
+                        <small><span class="glyphicon glyphicon-tags white"></span><?php
+                        echo sprintf('%s', str_replace(" ", "&nbsp;", _P('ticket-status', 'All Open')), $thisclient->getNumOpenTickets());
+                        ?></small></a>
                     <a class="state <?php if ($status == 'closed' && $mine != 1 ) echo 'active'; ?>"
                         href="?<?php echo Http::build_query(array('a' => 'search', 'status' => 'closed', 'my' => '0')); ?>">
-                        <?php echo sprintf('%s', __('All Closed'), $thisclient->getNumClosedTickets()); ?>
-                    </a>
-                </small>
-            </div>
-        </h2>
+                        <small><span class="glyphicon glyphicon-tags"></span><?php
+                        echo sprintf('%s', str_replace(" ", "&nbsp;", __('All Closed')), $thisclient->getNumClosedTickets());
+                        ?></small></a>
+                </div>
     </div>
 </div>
+</div>
+<div class="table-responsive">
 <table id="ticketTable" class="table table-striped table-hover table-condensed">
     <caption><?php echo $showing; ?></caption>
     <thead>
         <tr>
             <th class="text-nowrap">
-                <a href="tickets.php?sort=ID&order=<?php echo $negorder; ?><?php echo $qstr; ?>" title="Sort By Suggestion ID"><?php echo __('Suggestion #');?></a>
+                <a href="tickets.php?sort=ID&order=<?php echo $negorder; ?><?php echo $qstr; ?>" title="Sort By Ticket ID"><?php echo __('Ticket #');?></a>
             </th>
             <th class="text-nowrap">
                 <a href="tickets.php?sort=date&order=<?php echo $negorder; ?><?php echo $qstr; ?>" title="Sort By Date"><?php echo __('Create Date');?></a>
@@ -306,6 +298,7 @@ $tickets->values(
     ?>
     </tbody>
 </table>
+</div>
 <?php
 if ($total) {
     echo '<div>&nbsp;'.__('Page').':'.$pageNav->getPageLinks().'&nbsp;</div>';

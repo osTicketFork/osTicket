@@ -344,7 +344,7 @@ class UserNav {
                 $navs['new']=array('desc'=>__('<span class="glyphicon glyphicon-tag"></span> Open a New Ticket'),'href'=>'open.php','title'=>'');
             if($user && $user->isValid()) {
                 if(!$user->isGuest()) {
-                    $navs['tickets']=array('desc'=>sprintf(__('<span class="glyphicon glyphicon-tags"></span> Tickets <span class="badge">(%d)</span>'),$user->getNumTickets()),
+                    $navs['tickets']=array('desc'=>sprintf(__('<span class="glyphicon glyphicon-tags"></span> Tickets <span class="badge">%d</span>'),$user->getNumTickets()),
                                            'href'=>'tickets.php',
                                             'title'=>__('Show all tickets'));
                 } else {

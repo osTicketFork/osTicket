@@ -21,41 +21,40 @@ if ($thisclient && $thisclient->isGuest()
 
 <?php } ?>
 
-<table cellpadding="1" cellspacing="0" border="0" id="ticketInfo">
-    <tr>
-        <td colspan="2" width="100%">
+<div class="row">
+<div id="ticketInfo" class="display-table">
+<div class="col-sm-10 display-cell-bottom">
             <h1>
                 <a href="tickets.php?id=<?php echo $ticket->getId(); ?>" title="<?php echo __('Reload'); ?>"><i class="refresh icon-refresh"></i></a>
-                <b>
                 <?php $subject_field = TicketForm::getInstance()->getField('subject');
                     echo $subject_field->display($ticket->getSubject()); ?>
-                </b>
-                <small>#<?php echo $ticket->getNumber(); ?></small>
-<div class="pull-right">
-    <a class="action-button" href="tickets.php?a=print&id=<?php
+                <small class="text-nowrap">[#<?php echo $ticket->getNumber(); ?>]</small>
+            </h1>
+            </div>
+<div class="col-sm-2 display-cell-bottom">
+<div class="pull-right text-right hXspacing">
+    <a class="action-button text-nowrap" href="tickets.php?a=print&id=<?php
         echo $ticket->getId(); ?>"><i class="icon-print"></i> <?php echo __('Print'); ?></a>
 <?php if ($ticket->hasClientEditableFields()
         // Only ticket owners can edit the ticket details (and other forms)
         && $thisclient->getId() == $ticket->getUserId()) { ?>
-                <a class="action-button" href="tickets.php?a=edit&id=<?php
+                <a class="action-button text-nowrap" href="tickets.php?a=edit&id=<?php
                      echo $ticket->getId(); ?>"><i class="icon-edit"></i> <?php echo __('Edit'); ?></a>
 <?php } ?>
 </div>
-            </h1>
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2">
-          <div class="row">
+</div>
+</div>
+</div>
+    <div class="row">
             <div class="col-sm-6">
               <table class="infoTable table table-condensed">
                 <thead>
                     <tr><td class="headline" colspan="2">
-                        <?php echo __('<h1><small>Basic Suggestion Information</small></h1>'); ?>
+                        <?php echo __('<h1><small>Basic Ticket Information</small></h1>'); ?>
                     </td></tr>
                 </thead>
                 <tr>
-                    <th class="text-nowrap"><?php echo __('Suggestion Status');?>:</th>
+                    <th class="text-nowrap"><?php echo __('Ticket Status');?>:</th>
                     <td><?php echo ($S = $ticket->getStatus()) ? $S->getLocalName() : ''; ?></td>
                 </tr>
                 <tr>
@@ -90,11 +89,9 @@ if ($thisclient && $thisclient->isGuest()
               </table>
             </div>
           </div>
-       </td>
-    </tr>
-    <tr>
-        <td colspan="2">
 <!-- Custom Data -->
+<table class="infoTable table table-condensed" cellspacing="0" cellpadding="4" width="100%" border="0">
+<tr>
 <?php
 $sections = array();
 foreach (DynamicFormEntry::forTicket($ticket->getId()) as $i=>$form) {
@@ -191,10 +188,10 @@ echo $attrs; ?>><?php echo $draft ?: $info['message'];
     </div>
 <?php if ($ticket->isClosed()) { ?>
     <div class="warning-banner">
-        <?php echo __('Suggestion will be reopened on message post'); ?>
+        <?php echo __('Ticket will be reopened on message post'); ?>
     </div>
 <?php } ?>
-    <p style="text-align:center">
+    <p class="buttons text-center">
         <input class="btn btn-success" type="submit" value="<?php echo __('Post Reply');?>">
         <input class="btn btn-warning" type="reset" value="<?php echo __('Reset');?>">
         <input class="btn btn-default" type="button" value="<?php echo __('Cancel');?>" onClick="history.go(-1)">

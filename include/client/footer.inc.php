@@ -1,27 +1,18 @@
 	<!--Begin of footer-->
  <div class="push"></div>
-		</div><!--row-->
-
-	 <!--container-->
-        </div>
-    </div>
-	</div>
-	
-
-	
+        </div><!--container-->
+	</div><!--content-->
 	<div class="footer"> 
 				<div class="company">
 					Copyright &copy; <?php echo date('Y'); ?> <?php echo (string) $ost->company ?: 'osTicket.com'; ?> - All rights reserved.
 							<!--<a id="poweredBy" href="http://osticket.com" target="_blank"><?php echo __('Helpdesk software - powered by osTicket'); ?></a>-->
 				</div>
-				<div class="poweredBy col-md-offset-10 col-xs-offset-6"" ><?php echo __('Powered by'); ?>
+				<div class="poweredBy col-md-offset-10 col-xs-offset-6"><?php echo __('Powered by'); ?>
 					<a href="http://www.osticket.com" target="_blank"> <img alt="osTicket" src="scp/images/osticket-grey.png" class="osticket-logo"> </a>
 				</div>
-	</div>
-	
-	
-						
-	
+	</div><!--footer-->
+</div><!--wrapper-->
+
 <div id="overlay"></div>
 <div id="loading">
     <h4><?php echo __('Please Wait!');?></h4>
