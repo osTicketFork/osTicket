@@ -1,5 +1,8 @@
-osTicket
+osTicket (Fork)
 ========
+
+**Note:** This is a fork of [osTicket/osTicket](https://github.com/osTicket/osTicket). Please read our wiki [page](https://github.com/osTicketFork/osTicket/wiki/Why-osTicketFork) for further information in this matter.
+
 <a href="http://osticket.com"><img src="http://osticket.com/sites/default/files/osTicket.jpg"
 align="left" hspace="10" vspace="6"></a>
 
@@ -25,6 +28,7 @@ Requirements
   * PHP version 5.4 or greater, 5.6 is recommended
   * mysqli extension for PHP
   * MySQL database version 5.0 or greater
+  * [composer](https://getcomposer.org/)
 
 ### Recommendations
   * gd, gettext, imap, json, mbstring, and xml extensions for PHP
@@ -37,13 +41,16 @@ install the software and track updates is to clone the public repository.
 Create a folder on you web server (using whatever method makes sense for
 you) and cd into it. Then clone the repository (the folder must be empty!):
 
-    git clone https://github.com/osTicket/osTicket
+    git clone https://github.com/osTicketFork/osTicket
 
 And deploy the code into somewhere in your server's www root folder, for
 instance
 
     cd osTicket
+    php composer.phar install
     php manage.php deploy --setup /var/www/htdocs/osticket/
+
+**Note:** This setup procedure is currently not tested!
 
 Then you can configure your server if necessary to serve that folder, and
 visit the page and install osTicket as usual. Go ahead and even delete
