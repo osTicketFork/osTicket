@@ -124,7 +124,7 @@ if($ticket) {
         if (!$forms) $forms=DynamicFormEntry::forTicket($ticket->getId());
         // Auto add new fields to the entries
         foreach ($forms as $f) $f->addMissingFields();
-    }
+        }
     else
         $inc='view.inc.php';
 } elseif($thisclient->getNumTickets($thisclient->canSeeOrgTickets())) {

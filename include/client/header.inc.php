@@ -25,12 +25,17 @@ if ($lang) {
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title><?php echo Format::htmlchars($title); ?></title>
     <meta name="description" content="customer support platform">
     <meta name="keywords" content="osTicket, Customer support system, support ticket system">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <!--Bootstrap loading via CDN until we can load assets during packaging-->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <!--Bootstrap loading via CDN until we can load assets during packaging-->
+	
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" media="screen">
     <link rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/osticket.css" media="screen">
     <link rel="stylesheet" href="<?php echo ASSETS_PATH; ?>css/bootstrap-theme.css" media="screen">
     <link rel="stylesheet" href="<?php echo ASSETS_PATH; ?>css/print.css" media="print">
@@ -45,7 +50,9 @@ if ($lang) {
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/flags.css">
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/rtl.css"/>
     <link type="text/css" rel="stylesheet" href="<?php echo ROOT_PATH; ?>css/select2.min.css">
-    <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-1.11.2.min.js"></script>
+	<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+	<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <!--<script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-1.11.2.min.js"></script>-->
     <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="<?php echo ROOT_PATH; ?>js/osticket.js"></script>
     <script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/filedrop.field.js"></script>
@@ -164,6 +171,12 @@ if ($lang) {
     </div>
     <!--<div class="clearfix"><br/></div>-->
     <div id="content">
+	<div class="clearfix"></div>
+	<div class="container">
+	    <div class="row"> 
+        <div class="col-md-12"> 
+	
+			
     <?php if($errors['err']) { ?>
         <div id="msg_error" class="alert alert-danger"><?php echo $errors['err']; ?></div>
     <?php }elseif($msg) { ?>
@@ -171,3 +184,6 @@ if ($lang) {
     <?php }elseif($warn) { ?>
         <div id="msg_warning" class="alert alert-warning"><?php echo $warn; ?></div>
     <?php } ?>
+		<!--End of header-->
+
+	

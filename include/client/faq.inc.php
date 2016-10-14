@@ -18,18 +18,14 @@ $category=$faq->getCategory();
     <?php echo $faq->getLocalQuestion() ?>
   </div>
   <div class="panel-body">
-    <?php echo $faq->getLocalAnswerWithImages(); ?>
-  </div>
+<?php echo $faq->getLocalAnswerWithImages(); ?>
+</div>
   <div class="panel-footer text-muted">
     <?php echo __('Last updated').' '. Format::relativeTime(Misc::db2gmtime($category->getUpdateDate())); ?>
   </div>
 </div>
-<div class="faded"><?php echo sprintf(__('Last Updated %s'),
-    Format::relativeTime(Misc::db2gmtime($category->getUpdateDate()))); ?></div>
-<br/>
-<div class="thread-body bleed">
-<?php echo $faq->getLocalAnswerWithImages(); ?>
 </div>
+
 
 <div class="col-xs-12 col-sm-4">
     <div class="searchbar">
@@ -69,5 +65,5 @@ $category=$faq->getCategory();
                 } ?>
             </div>-->
         </div>
-    </div>
+</div>
 </div>

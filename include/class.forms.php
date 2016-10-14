@@ -1586,6 +1586,14 @@ class DatetimeField extends FormField {
         else
             return Format::date($value, false, false, !$config['gmt'] ? 'UTC' : false);
     }
+    function export($value) {
+        $config = $this->getConfiguration();
+        if (!$value)
+            return '';
+        else
+            return Format::date($value, false, 'y-MM-dd HH:mm:ss', !$config['gmt'] ? 'UTC' : false);
+    }
+
     function getConfigurationOptions() {
         return array(
             'time' => new BooleanField(array(
@@ -1896,7 +1904,6 @@ class PriorityField extends ChoiceField {
     function whatChanged($before, $after) {
         return FormField::whatChanged($before, $after);
     }
-
     function searchable($value) {
         // Priority isn't searchable this way
         return null;
@@ -1945,7 +1952,7 @@ class DepartmentField extends ChoiceField {
     function hasIdValue() {
         return true;
     }
-    function getChoices($verbose=false) {
+    function getChoices() {
         global $cfg;
         $choices = array();
         if (($depts = Dept::getDepartments()))
@@ -2016,6 +2023,7 @@ class AssigneeField extends ChoiceField {
     function getChoices($verbose=false) {
         global $cfg;
         if (!isset($this->_choices)) {
+
             $config = $this->getConfiguration();
             $choices = array(
                     __('Agents') => new ArrayObject(),
@@ -2304,6 +2312,7 @@ class FileUploadField extends FormField {
         $_SESSION[':uploadedFiles'][$id] = 1;
 
         return $id;
+
     }
     /**
      * Called from FileUploadWidget::getValue() when manual upload is used
@@ -2703,7 +2712,7 @@ class TextboxWidget extends Widget {
 }
 class TextboxSelectionWidget extends TextboxWidget {
     //TODO: Support multi-input e.g comma separated inputs
-    function render($options=array(), $extraConfig=array()) {
+    function render($options=array()) {
         if ($this->value && is_array($this->value))
             $this->value = current($this->value);
         parent::render($options);
@@ -3303,6 +3312,9 @@ class FileUploadWidget extends Widget {
         // If no value was sent, assume an empty list
         if (!($files = parent::getValue()))
             return array();
+
+        // Files uploaded here MUST have been uploaded by this user and
+        // identified in the session
         $allowed = array();
         // Files already attached to the field are allowed
         foreach ($this->field->getFiles() as $F) {
@@ -3329,10 +3341,10 @@ class FileUploadWidget extends Widget {
                 $ids[$name] = $id;
             else
                 $ids[] = $id;
-        }
 
         return $ids;
-    }
+		}
+	}
 }
 class FileUploadError extends Exception {}
 class FreeTextField extends FormField {
@@ -3418,6 +3430,7 @@ class FreeTextWidget extends Widget {
     }
 }
 class VisibilityConstraint {
+
     static $operators = array(
         'eq' => 1,
     );
@@ -3566,6 +3579,7 @@ class AssignmentForm extends Form {
     static $id = 'assign';
     var $_assignee = null;
     var $_assignees = null;
+
     function getFields() {
         if ($this->fields)
             return $this->fields;
@@ -3696,7 +3710,6 @@ class ClaimForm extends AssignmentForm {
 
         return $this->fields;
     }
-
 }
 class TransferForm extends Form {
     static $id = 'transfer';
