@@ -25,60 +25,63 @@ require_once(INCLUDE_DIR.'class.json.php');
 $ticket=null;
 if($_REQUEST['id']) {
     if (!($ticket = Ticket::lookup($_REQUEST['id']))) {
-        $errors['err']=__('Unknown or invalid ticket ID.');
-    } elseif(!$ticket->checkUserAccess($thisclient)) {
-        $errors['err']=__('Unknown or invalid ticket ID.'); //Using generic message on purpose!
-        $ticket=null;
+       $errors['err']=__('Unknown or invalid ticket ID.');
+    //} elseif(!$ticket->checkUserAccess($thisclient)) {
+    //    $errors['err']=__('Unknown or invalid ticket ID.'); //Using generic message on purpose!
+    //    $ticket=null;
     }
 }
 
 if (!$ticket && $thisclient->isGuest())
     Http::redirect('view.php');
 
-$tform = TicketForm::objects()->one();
+$tform = TicketForm::objects()->one()->getForm();
 $messageField = $tform->getField('message');
 $attachments = $messageField->getWidget()->getAttachments();
 
 //Process post...depends on $ticket object above.
-if($_POST && is_object($ticket) && $ticket->getId()):
+if ($_POST && is_object($ticket) && $ticket->getId()) {
     $errors=array();
     switch(strtolower($_POST['a'])){
     case 'edit':
         if(!$ticket->checkUserAccess($thisclient) //double check perm again!
-                || $thisclient->getId() != $ticket->getUserId())
+                || $thisclient->getId() <> $ticket->getUserId())
             $errors['err']=__('Access Denied. Possibly invalid ticket ID');
-        elseif (!$cfg || !$cfg->allowClientUpdates())
-            $errors['err']=__('Access Denied. Client updates are currently disabled');
         else {
             $forms=DynamicFormEntry::forTicket($ticket->getId());
+            $changes = array();
             foreach ($forms as $form) {
+				$form->filterFields(function($f) { return !$f->isStorable(); });
                 $form->setSource($_POST);
                 if (!$form->isValid())
                     $errors = array_merge($errors, $form->errors());
             }
         }
         if (!$errors) {
-            foreach ($forms as $f) $f->save();
+            foreach ($forms as $f) {
+                $changes += $f->getChanges();
+                $f->save();
+            }
+            if ($changes)
+                $ticket->logEvent('edited', array('fields' => $changes));
             $_REQUEST['a'] = null; //Clear edit action - going back to view.
-            $ticket->logNote(__('Ticket details updated'), sprintf(
-                __('Ticket details were updated by client %s &lt;%s&gt;'),
-                $thisclient->getName(), $thisclient->getEmail()));
         }
         break;
     case 'reply':
         if(!$ticket->checkUserAccess($thisclient)) //double check perm again!
             $errors['err']=__('Access Denied. Possibly invalid ticket ID');
 
-        if(!$_POST['message'])
-
-            $errors['message']=__('Message required');
+        $_POST['message'] = ThreadEntryBody::clean($_POST['message']);
+        if (!$_POST['message'])
+            $errors['message'] = __('Message required');
 
         if(!$errors) {
             //Everything checked out...do the magic.
             $vars = array(
                     'userId' => $thisclient->getId(),
                     'poster' => (string) $thisclient->getName(),
-                    'message' => $_POST['message']);
+                    'message' => $_POST['message']
+                    );
             $vars['cannedattachments'] = $attachments->getClean();
             if (isset($_POST['draft_id']))
                 $vars['draft_id'] = $_POST['draft_id'];
@@ -102,29 +105,39 @@ if($_POST && is_object($ticket) && $ticket->getId()):
     default:
         $errors['err']=__('Unknown action');
     }
-    $ticket->reload();
-endif;
-$nav->setActiveNav('tickets');
-if($ticket && $ticket->checkUserAccess($thisclient)) {
+}
+elseif (is_object($ticket) && $ticket->getId()) {
+    switch(strtolower($_REQUEST['a'])) {
+    case 'print':
+        if (!$ticket || !$ticket->pdfExport($_REQUEST['psize']))
+            $errors['err'] = __('Internal error: Unable to export the ticket to PDF for print.');
+        break;
+    }
+}
+
+$nav->setActiveNav('tickets');  // && $ticket->checkUserAccess($thisclient) 
+if($ticket) {
     if (isset($_REQUEST['a']) && $_REQUEST['a'] == 'edit'
-            && $cfg->allowClientUpdates()) {
+            && $ticket->hasClientEditableFields()) {
         $inc = 'edit.inc.php';
         if (!$forms) $forms=DynamicFormEntry::forTicket($ticket->getId());
         // Auto add new fields to the entries
-        foreach ($forms as $f) $f->addMissingFields();
+        foreach ($forms as $f) {
+            $f->filterFields(function($f) { return !$f->isStorable(); });
+            $f->addMissingFields();
+        }       
     }
     else
         $inc='view.inc.php';
-} elseif($thisclient->getNumTickets()) {
+} elseif($thisclient->getNumTickets($thisclient->canSeeOrgTickets())) {
     $inc='tickets.inc.php';
 } else {
-    $nav->setActiveNav('new');
-    $inc='open.inc.php';
+    //$nav->setActiveNav('new');
+    //$inc='open.inc.php';
+	$inc='tickets.inc.php';
 }
 include(CLIENTINC_DIR.'header.inc.php');
 include(CLIENTINC_DIR.$inc);
-if ($tform instanceof DynamicFormEntry)
-    $tform = $tform->getForm();
 print $tform->getMedia();
 include(CLIENTINC_DIR.'footer.inc.php');
 ?>

@@ -13,26 +13,48 @@ $form = null;
 if (!$info['topicId'])
     $info['topicId'] = $cfg->getDefaultTopicId();
 
+$forms = array();
 if ($info['topicId'] && ($topic=Topic::lookup($info['topicId']))) {
-    $form = $topic->getForm();
-    if ($_POST && $form) {
-        $form = $form->instanciate();
-        $form->isValidForClient();
+    foreach ($topic->getForms() as $F) {
+        if (!$F->hasAnyVisibleFields())
+            continue;
+        if ($_POST) {
+            $F = $F->instanciate();
+            $F->isValidForClient();
+        }
+        $forms[] = $F;
     }
 }
 
 ?>
-<h1><?php echo __('Open a New Ticket');?></h1>
-<p><?php echo __('Please fill in the form below to open a new ticket.');?></p>
+<div class="row">
+<div class="page-title">
+	<h1><?php echo __('Open a New Ticket');?></h1>
+	<p><?php echo __('Please fill in the form below to open a new ticket.');?></p>
+</div>
+</div>
 <form id="ticketForm" method="post" action="open.php" enctype="multipart/form-data">
   <?php csrf_token(); ?>
   <input type="hidden" name="a" value="open">
-  <table width="800" cellpadding="1" cellspacing="0" border="0">
+  <table width="100%"" cellpadding="1" cellspacing="0" border="0">
     <tbody>
-    <tr>
-        <td class="required"><?php echo __('Help Topic');?>:</td>
-        <td>
-            <select id="topicId" name="topicId" onchange="javascript:
+<?php
+        if (!$thisclient) {
+            $uform = UserForm::getUserForm()->getForm($_POST);
+            if ($_POST) $uform->isValid();
+            $uform->render(false);
+        }
+        else { ?>
+            <tr><td colspan="2"><hr /></td></tr>
+        <tr class="form-group"><td><?php echo __('Email'); ?>:</td><td><?php echo $thisclient->getEmail(); ?></td></tr>
+        <tr class="form-group"><td><?php echo __('Client'); ?>:</td><td><?php echo $thisclient->getName(); ?></td></tr>
+        <?php } ?>
+    </tbody>
+
+        <div class="form-group">
+		<label class="required" for="topicId"><?php echo __('Help Topic'); ?></label> <font class="error">*</font>
+        
+            <select class="form-control" id="topicId" name="topicId" onchange="javascript:
                     var data = $(':input[name]', '#dynamic-form').serialize();
                     $.ajax(
                       'ajax.php/form/help-topic/' + this.value,
@@ -56,33 +78,13 @@ if ($info['topicId'] && ($topic=Topic::lookup($info['topicId']))) {
                 <?php
                 } ?>
             </select>
-            <font class="error">*&nbsp;<?php echo $errors['topicId']; ?></font>
-        </td>
-    </tr>
-<?php
-        if (!$thisclient) {
-            $uform = UserForm::getUserForm()->getForm($_POST);
-            if ($_POST) $uform->isValid();
-            $uform->render(false);
-        }
-        else { ?>
-            <tr><td colspan="2"><hr /></td></tr>
-        <tr><td><?php echo __('Email'); ?>:</td><td><?php echo $thisclient->getEmail(); ?></td></tr>
-        <tr><td><?php echo __('Client'); ?>:</td><td><?php echo $thisclient->getName(); ?></td></tr>
-        <?php } ?>
-    </tbody>
-    <tbody id="dynamic-form">
-        <?php if ($form) {
+            <?php echo $errors['topicId']; ?></font>
+	</div>
+    <table id="dynamic-form">
+        <?php foreach ($forms as $form) {
             include(CLIENTINC_DIR . 'templates/dynamic-form.tmpl.php');
         } ?>
-    </tbody>
-    <tbody><?php
-        $tform = TicketForm::getInstance();
-        if ($_POST) {
-            $tform->isValidForClient();
-        }
-        $tform->render(false); ?>
-    </tbody>
+    </table>
     <tbody>
     <?php
     if($cfg && $cfg->isCaptchaEnabled() && (!$thisclient || !$thisclient->isValid())) {
@@ -101,14 +103,13 @@ if ($info['topicId'] && ($topic=Topic::lookup($info['topicId']))) {
     </tr>
     <?php
     } ?>
-    <tr><td colspan=2>&nbsp;</td></tr>
+   
     </tbody>
   </table>
-<hr/>
-  <p style="text-align:center;">
-        <input type="submit" value="<?php echo __('Create Ticket');?>">
-        <input type="reset" name="reset" value="<?php echo __('Reset');?>">
-        <input type="button" name="cancel" value="<?php echo __('Cancel'); ?>" onclick="javascript:
+  <p class="buttons" >
+        <input class="btn btn-success" type="submit" value="<?php echo __('Create Ticket');?>">
+        <input class="btn btn-warning" type="reset" name="reset" value="<?php echo __('Reset');?>">
+        <input class="btn btn-default" type="button" name="cancel" value="<?php echo __('Cancel'); ?>" onclick="javascript:
             $('.richtext').each(function() {
                 var redactor = $(this).data('redactor');
                 if (redactor && redactor.opts.draftDelete)
@@ -117,3 +118,4 @@ if ($info['topicId'] && ($topic=Topic::lookup($info['topicId']))) {
             window.location.href='index.php';">
   </p>
 </form>
+<div class="clearfix"></div>

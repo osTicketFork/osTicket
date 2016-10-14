@@ -1,9 +1,7 @@
 <?php
 $info = $_POST;
-if (!isset($info['timezone_id']))
+if (!isset($info['timezone']))
     $info += array(
-        'timezone_id' => $cfg->getDefaultTimezoneId(),
-        'dst' => $cfg->observeDaylightSaving(),
         'backend' => null,
     );
 if (isset($user) && $user instanceof ClientCreateRequest) {
@@ -16,12 +14,16 @@ if (isset($user) && $user instanceof ClientCreateRequest) {
 $info = Format::htmlchars(($errors && $_POST)?$_POST:$info);
 
 ?>
-<h1><?php echo __('Account Registration'); ?></h1>
-<p><?php echo __(
-'Use the forms below to create or update the information we have on file for your account'
-); ?>
-</p>
-<form action="account.php" method="post">
+<div class="row">
+	<div class="page-title">  
+	<h1><?php echo __('Account Registration'); ?></h1>
+	<p><?php echo __(
+	'Use the forms below to create or update the information we have on file for your account'
+	); ?>
+	</p>
+	</div>
+</div>
+<form class="form-group" action="account.php" method="post">
   <?php csrf_token(); ?>
   <input type="hidden" name="do" value="<?php echo Format::htmlchars($_REQUEST['do']
     ?: ($info['backend'] ? 'import' :'create')); ?>" />
@@ -29,44 +31,29 @@ $info = Format::htmlchars(($errors && $_POST)?$_POST:$info);
 <tbody>
 <?php
     $cf = $user_form ?: UserForm::getInstance();
-    $cf->render(false);
+    $cf->render(false, false, array('mode' => 'create'));
 ?>
 <tr>
     <td colspan="2">
-        <div><hr><h3><?php echo __('Preferences'); ?></h3>
+        <div><h3><?php echo __('Preferences'); ?></h3>
         </div>
     </td>
 </tr>
-    <td><?php echo __('Time Zone'); ?>:</td>
-    <td>
-        <select name="timezone_id" id="timezone_id">
+    <tr>
+        <td width="180">
+           <label> <?php echo __('Time Zone');?>:</label>
+        </td>
+        <td>
             <?php
-            $sql='SELECT id, offset,timezone FROM '.TIMEZONE_TABLE.' ORDER BY id';
-            if(($res=db_query($sql)) && db_num_rows($res)){
-                while(list($id,$offset, $tz)=db_fetch_row($res)){
-                    $sel=($info['timezone_id']==$id)?'selected="selected"':'';
-                    echo sprintf('<option value="%d" %s>GMT %s - %s</option>',$id,$sel,$offset,$tz);
-                }
-            }
-            ?>
-        </select>
-        &nbsp;<span class="error"><?php echo $errors['timezone_id']; ?></span>
-    </td>
-</tr>
-<tr>
-    <td width="180">
-        <?php echo __('Daylight Saving'); ?>:
-    </td>
-    <td>
-        <input type="checkbox" name="dst" value="1" <?php echo $info['dst']?'checked="checked"':''; ?>>
-        <?php echo __('Observe daylight saving'); ?>
-        <em>(<?php echo __('Current Time'); ?>:
-            <strong><?php echo Format::date($cfg->getDateTimeFormat(),Misc::gmtime(),$info['tz_offset'],$info['dst']); ?></strong>)</em>
-    </td>
-</tr>
+            $TZ_NAME = 'timezone';
+            $TZ_TIMEZONE = $info['timezone'];
+            include INCLUDE_DIR.'staff/templates/timezone.tmpl.php'; ?>
+            <div class="error"><?php echo $errors['timezone']; ?></div>
+        </td>
+    </tr>
 <tr>
     <td colspan=2">
-        <div><hr><h3><?php echo __('Access Credentials'); ?></h3></div>
+        <div><h3><?php echo __('Access Credentials'); ?></h3></div>
     </td>
 </tr>
 <?php if ($info['backend']) { ?>
@@ -86,32 +73,40 @@ $info = Format::htmlchars(($errors && $_POST)?$_POST:$info);
     </td>
 </tr>
 <?php } else { ?>
-<tr>
-    <td width="180">
-        <?php echo __('Create a Password'); ?>:
-    </td>
-    <td>
-        <input type="password" size="18" name="passwd1" value="<?php echo $info['passwd1']; ?>">
-        &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd1']; ?></span>
-    </td>
-</tr>
-<tr>
-    <td width="180">
-        <?php echo __('Confirm New Password'); ?>:
-    </td>
-    <td>
-        <input type="password" size="18" name="passwd2" value="<?php echo $info['passwd2']; ?>">
-        &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd2']; ?></span>
-    </td>
-</tr>
-<?php } ?>
 </tbody>
 </table>
-<hr>
-<p style="text-align: center;">
-    <input type="submit" value="Register"/>
-    <input type="button" value="Cancel" onclick="javascript:
+<div class="row">
+	<div class="col-md-4">
+         <label> <?php echo __('Create a Password'); ?>:</label>
+
+        <input class="form-control" type="password" size="18" name="passwd1" value="<?php echo $info['passwd1']; ?>">
+        &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd1']; ?></span>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4"> 
+        <label><?php echo __('Confirm New Password'); ?>:</label>
+   
+        <input class="form-control" type="password" size="18" name="passwd2" value="<?php echo $info['passwd2']; ?>">
+        &nbsp;<span class="error">&nbsp;<?php echo $errors['passwd2']; ?></span>
+	</div>
+	
+</div>
+<?php } ?>
+
+<p>
+    <input class="btn btn-success" type="submit" value="Register"/>
+    <input class="btn btn-default" type="button" value="Cancel" onclick="javascript:
         window.location.href='index.php';"/>
 </p>
 </form>
-
+<?php if (!isset($info['timezone'])) { ?>
+<!-- Auto detect client's timezone where possible -->
+<script type="text/javascript" src="<?php echo ROOT_PATH; ?>js/jstz.min.js"></script>
+<script type="text/javascript">
+$(function() {
+    var zone = jstz.determine();
+    $('#timezone-dropdown').val(zone.name()).trigger('change');
+});
+</script>
+<?php }

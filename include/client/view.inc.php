@@ -17,7 +17,7 @@ if ($thisclient && $thisclient->isGuest()
 
 <div id="msg_info">
     <i class="icon-compass icon-2x pull-left"></i>
-    <strong><?php echo __('Looking for your other tickets?'); ?></strong></br>
+    <strong><?php echo __('Looking for your other tickets?'); ?></strong><br />
     <a href="<?php echo ROOT_PATH; ?>login.php?e=<?php
         echo urlencode($thisclient->getEmail());
     ?>" style="text-decoration:underline"><?php echo __('Sign In'); ?></a>
@@ -30,167 +30,172 @@ if ($thisclient && $thisclient->isGuest()
 <table width="800" cellpadding="1" cellspacing="0" border="0" id="ticketInfo">
     <tr>
         <td colspan="2" width="100%">
-            <h1>
-                <?php echo sprintf(__('Ticket #%s'), $ticket->getNumber()); ?> &nbsp;
-                <a href="tickets.php?id=<?php echo $ticket->getId(); ?>" title="Reload"><span class="Icon refresh">&nbsp;</span></a>
-<?php if ($cfg->allowClientUpdates()
+            <h2>
+                <a href="tickets.php?id=<?php echo $ticket->getId(); ?>" title="<?php echo __('Reload'); ?>"><i class="refresh icon-refresh"></i></a>
+                <b>
+                <?php $subject_field = TicketForm::getInstance()->getField('subject');
+                    echo $subject_field->display($ticket->getSubject()); ?>
+                </b>
+                <small>#<?php echo $ticket->getNumber(); ?></small>
+<div class="pull-right">
+    <a class="action-button btn-lg" href="tickets.php?a=print&id=<?php
+        echo $ticket->getId(); ?>"><i class="icon-print"></i> <?php echo __('Print'); ?></a>
+<?php if ($ticket->hasClientEditableFields()
         // Only ticket owners can edit the ticket details (and other forms)
         && $thisclient->getId() == $ticket->getUserId()) { ?>
-                <a class="action-button pull-right" href="tickets.php?a=edit&id=<?php
-                     echo $ticket->getId(); ?>"><i class="icon-edit"></i> Edit</a>
+                <a class="action-button  btn-lg" href="tickets.php?a=edit&id=<?php
+                     echo $ticket->getId(); ?>"><i class="icon-edit"></i> <?php echo __('Edit'); ?></a>
 <?php } ?>
-            </h1>
+</div>
+            </h2>
         </td>
-    </tr>
-    <tr>
-        <td width="50%">
-            <table class="infoTable" cellspacing="1" cellpadding="3" width="100%" border="0">
-                <tr>
-                    <th width="100"><?php echo __('Ticket Status');?>:</th>
-                    <td><?php echo $ticket->getStatus(); ?></td>
-                </tr>
-                <tr>
-                    <th><?php echo __('Department');?>:</th>
-                    <td><?php echo Format::htmlchars($dept instanceof Dept ? $dept->getName() : ''); ?></td>
-                </tr>
-                <tr>
-                    <th><?php echo __('Create Date');?>:</th>
-                    <td><?php echo Format::db_datetime($ticket->getCreateDate()); ?></td>
-                </tr>
-           </table>
-       </td>
-       <td width="50%">
-           <table class="infoTable" cellspacing="1" cellpadding="3" width="100%" border="0">
-               <tr>
-                   <th width="100"><?php echo __('Name');?>:</th>
-                   <td><?php echo mb_convert_case(Format::htmlchars($ticket->getName()), MB_CASE_TITLE); ?></td>
-               </tr>
-               <tr>
-                   <th width="100"><?php echo __('Email');?>:</th>
-                   <td><?php echo Format::htmlchars($ticket->getEmail()); ?></td>
-               </tr>
-               <tr>
-                   <th><?php echo __('Phone');?>:</th>
-                   <td><?php echo $ticket->getPhoneNumber(); ?></td>
-               </tr>
-            </table>
-       </td>
-    </tr>
-    <tr>
+    </tr></table>
+<div class="row">
+    <div class="col-md-6">
+		<div>
+			<h3><?php echo __('Basic Ticket Information'); ?></h3>
+		</div>
+		<div>
+			<label><?php echo __('Ticket Status');?>:</label>
+			<?php echo ($S = $ticket->getStatus()) ? $S->getLocalName() : ''; ?>
+		</div>
+		<div>
+			<label><?php echo __('Department');?>:</label>
+			<?php echo Format::htmlchars($dept instanceof Dept ? $dept->getName() : ''); ?>
+		</div>
+		<div>
+			<label><?php echo __('Create Date');?>:</label>
+			<?php echo Format::datetime($ticket->getCreateDate()); ?>
+		</div>
+    </div>
+	<div class="col-md-6">
+		<div>
+			  <h3><?php echo __('User Information'); ?></h3>
+		</div>
+		<div>
+			<label><?php echo __('Name');?>:</label>
+			<?php echo mb_convert_case(Format::htmlchars($ticket->getName()), MB_CASE_TITLE); ?>
+		</div>
+		<div>
+			<label><?php echo __('Email');?>:</label>
+			<?php echo Format::htmlchars($ticket->getEmail()); ?>
+		</div>
+		<div>
+			<label><?php echo __('Phone');?>:</label>
+			<?php echo $ticket->getPhoneNumber(); ?>
+		 </div> 
+	 </div>
+</div>
+<div class="row">
+<div class="col-md-12">
+<!-- Custom Data -->
 <?php
-foreach (DynamicFormEntry::forTicket($ticket->getId()) as $idx=>$form) {
-    $answers = $form->getAnswers();
-    if ($idx > 0 and $idx % 2 == 0) { ?>
-        </tr><tr>
-    <?php } ?>
-    <td width="50%">
-        <table class="infoTable" cellspacing="1" cellpadding="3" width="100%" border="0">
-    <?php foreach ($answers as $answer) {
-        if (in_array($answer->getField()->get('name'), array('name', 'email', 'subject')))
-            continue;
-        elseif ($answer->getField()->get('private'))
-            continue;
-        ?>
-        <tr>
-        <th width="100"><?php echo $answer->getField()->get('label');
-            ?>:</th>
-        <td><?php echo $answer->display(); ?></td>
-        </tr>
-    <?php } ?>
-    </table></td>
-<?php } ?>
-</tr>
-</table>
-<br>
-<div class="subject"><?php echo __('Subject'); ?>: <strong><?php echo Format::htmlchars($ticket->getSubject()); ?></strong></div>
-<div id="ticketThread">
-<?php
-if($ticket->getThreadCount() && ($thread=$ticket->getClientThread())) {
-    $threadType=array('M' => 'message', 'R' => 'response');
-    foreach($thread as $entry) {
-
-        //Making sure internal notes are not displayed due to backend MISTAKES!
-        if(!$threadType[$entry['thread_type']]) continue;
-        $poster = $entry['poster'];
-        if($entry['thread_type']=='R' && ($cfg->hideStaffName() || !$entry['staff_id']))
-            $poster = ' ';
-        ?>
-        <table class="thread-entry <?php echo $threadType[$entry['thread_type']]; ?>" cellspacing="0" cellpadding="1" width="800" border="0">
-            <tr><th><div>
-<?php echo Format::db_datetime($entry['created']); ?>
-                &nbsp;&nbsp;<span class="textra"></span>
-                <span><?php echo $poster; ?></span>
-            </div>
-            </th></tr>
-            <tr><td class="thread-body"><div><?php echo Format::clickableurls($entry['body']->toHtml()); ?></div></td></tr>
-            <?php
-            if($entry['attachments']
-                    && ($tentry=$ticket->getThreadEntry($entry['id']))
-                    && ($urls = $tentry->getAttachmentUrls())
-                    && ($links=$tentry->getAttachmentsLinks())) { ?>
-                <tr><td class="info"><?php echo $links; ?></td></tr>
-<?php       }
-            if ($urls) { ?>
-                <script type="text/javascript">
-                    $(function() { showImagesInline(<?php echo
-                        JsonDataEncoder::encode($urls); ?>); });
-                </script>
-<?php       } ?>
-        </table>
-    <?php
+$sections = array();
+foreach (DynamicFormEntry::forTicket($ticket->getId()) as $i=>$form) {
+    // Skip core fields shown earlier in the ticket view
+    $answers = $form->getAnswers()->exclude(Q::any(array(
+        'field__flags__hasbit' => DynamicFormField::FLAG_EXT_STORED,
+        'field__name__in' => array('subject', 'priority'),
+        Q::not(array('field__flags__hasbit' => DynamicFormField::FLAG_CLIENT_VIEW)),
+    )));
+    // Skip display of forms without any answers
+    foreach ($answers as $j=>$a) {
+        if ($v = $a->display())
+            $sections[$i][$j] = array($v, $a);
     }
 }
-?>
+foreach ($sections as $i=>$answers) {
+    ?>
+        <div class="col-md-4 row">
+        <div><h3><?php echo $form->getTitle(); ?></h3></div>
+        <?php foreach($answers as $a) {
+            if (!($v = $a->display())) continue; ?>
+            <div>
+                <label><?php
+    echo $a->getField()->get('label');
+                ?>:</label>
+               <?php
+    echo $v;
+                ?>
+            
+            <?php } ?>
+			</div>
+    <?php
+    $idx++;
+} ?></br>
+	</div>
 </div>
-<div class="clear" style="padding-bottom:10px;"></div>
-<?php if($errors['err']) { ?>
-    <div id="msg_error"><?php echo $errors['err']; ?></div>
-<?php }elseif($msg) { ?>
-    <div id="msg_notice"><?php echo $msg; ?></div>
-<?php }elseif($warn) { ?>
-    <div id="msg_warning"><?php echo $warn; ?></div>
-<?php } ?>
+</div>
+
+<div class="col-md-12">
 
 <?php
+    $ticket->getThread()->render(array('M', 'R'), array(
+                'mode' => Thread::MODE_CLIENT,
+                'html-id' => 'ticketThread')
+            );
+?>
+
+
+<?php if($errors['err']) { ?>
+    <div id="error" class="alert alert-danger"><?php echo $errors['err']; ?></div>
+<?php }elseif($msg) { ?>
+    <div id="msg_notice" class="alert alert-warning"><?php echo $msg; ?></div>
+<?php }elseif($warn) { ?>
+    <div id="msg_warning" class="alert alert-danger"><?php echo $warn; ?></div>
+<?php }
 
 if (!$ticket->isClosed() || $ticket->isReopenable()) { ?>
-<form id="reply" action="tickets.php?id=<?php echo $ticket->getId(); ?>#reply" name="reply" method="post" enctype="multipart/form-data">
+<form id="reply" action="tickets.php?id=<?php echo $ticket->getId();
+?>#reply" name="reply" method="post" enctype="multipart/form-data">
     <?php csrf_token(); ?>
     <h2><?php echo __('Post a Reply');?></h2>
     <input type="hidden" name="id" value="<?php echo $ticket->getId(); ?>">
     <input type="hidden" name="a" value="reply">
-    <table border="0" cellspacing="0" cellpadding="3" style="width:100%">
-        <tr>
-            <td colspan="2">
-                <?php
-                if($ticket->isClosed()) {
-                    $msg='<b>'.__('Ticket will be reopened on message post').'</b>';
-                } else {
-                    $msg=__('To best assist you, we request that you be specific and detailed');
-                }
-                ?>
-                <span id="msg"><em><?php echo $msg; ?> </em></span><font class="error">*&nbsp;<?php echo $errors['message']; ?></font>
-                <br/>
-                <textarea name="message" id="message" cols="50" rows="9" wrap="soft"
-                    data-draft-namespace="ticket.client"
-                    data-draft-object-id="<?php echo $ticket->getId(); ?>"
-                    class="richtext ifhtml draft"><?php echo $info['message']; ?></textarea>
-        <?php
-        if ($messageField->isAttachmentsEnabled()) { ?>
-<?php
-            print $attachments->render(true);
-            print $attachments->getForm()->getMedia();
-?>
-        <?php
-        } ?>
-            </td>
-        </tr>
-    </table>
-    <p style="padding-left:165px;">
-        <input type="submit" value="<?php echo __('Post Reply');?>">
-        <input type="reset" value="<?php echo __('Reset');?>">
-        <input type="button" value="<?php echo __('Cancel');?>" onClick="history.go(-1)">
+    <div>
+        <p><em><?php
+         echo __('To best assist you, we request that you be specific and detailed'); ?></em>
+		
+        <font class="error alert">*&nbsp;<?php echo $errors['message']; ?></font>
+        </p>
+        <textarea name="message" id="message" cols="50" rows="9" wrap="soft"
+            class="<?php if ($cfg->isRichTextEnabled()) echo 'richtext';
+                ?> draft" <?php
+list($draft, $attrs) = Draft::getDraftAndDataAttrs('ticket.client', $ticket->getId(), $info['message']);
+echo $attrs; ?>><?php echo $draft ?: $info['message'];
+            ?></textarea>
+    <?php
+    if ($messageField->isAttachmentsEnabled()) {
+        print $attachments->render(array('client'=>true));
+    } ?>
+    </div>
+<?php if ($ticket->isClosed()) { ?>
+    <div class="alert alert-info">
+        <?php echo __('Ticket will be reopened on message post'); ?>
+    </div>
+<?php } ?>
+    <p >
+        <input  class="btn btn-success" type="submit" value="<?php echo __('Post Reply');?>">
+        <input  class="btn btn-warning" type="reset" value="<?php echo __('Reset');?>">
+        <input  class="btn btn-default" type="button" value="<?php echo __('Cancel');?>" onClick="location.href='/tickets.php'">
     </p>
 </form>
+</div>
+<div class="clearfix"></div>
 <?php
 } ?>
+<script type="text/javascript">
+<?php
+// Hover support for all inline images
+$urls = array();
+foreach (AttachmentFile::objects()->filter(array(
+    'attachments__thread_entry__thread__id' => $ticket->getThreadId(),
+    'attachments__inline' => true,
+)) as $file) {
+    $urls[strtolower($file->getKey())] = array(
+        'download_url' => $file->getDownloadUrl(),
+        'filename' => $file->name,
+    );
+} ?>
+showImagesInline(<?php echo JsonDataEncoder::encode($urls); ?>);
+</script>

@@ -48,8 +48,7 @@ $nav=null;
 $thisclient = UserAuthenticationBackend::getUser();
 
 if (isset($_GET['lang']) && $_GET['lang']) {
-    if (Internationalization::getLanguageInfo($_GET['lang']))
-        $_SESSION['client:lang'] = $_GET['lang'];
+    Internationalization::setCurrentLanguage($_GET['lang']);
 }
 
 // Bootstrap gettext translations as early as possible, but after attempting
@@ -63,20 +62,13 @@ if($thisclient && $thisclient->getId() && $thisclient->isValid()){
     $thisclient = null;
 }
 
-/******* CSRF Protectin *************/
-// Enforce CSRF protection for POSTS
-if ($_POST  && !$ost->checkCSRFToken()) {
-    Http::redirect('index.php');
-    //just incase redirect fails
-    die('Action denied (400)!');
-}
-
 //Add token to the header - used on ajax calls [DO NOT CHANGE THE NAME]
 $ost->addExtraHeader('<meta name="csrf_token" content="'.$ost->getCSRFToken().'" />');
 
 /* Client specific defaults */
 define('PAGE_LIMIT', DEFAULT_PAGE_LIMIT);
 
+require(INCLUDE_DIR.'class.nav.php');
 $nav = new UserNav($thisclient, 'home');
 
 $exempt = in_array(basename($_SERVER['SCRIPT_NAME']), array('logout.php', 'ajax.php', 'logs.php', 'upgrade.php'));

@@ -32,7 +32,7 @@ class PluginConfig extends Config {
      */
     function getForm() {
         if (!isset($this->form)) {
-            $this->form = new Form($this->getOptions());
+            $this->form = new SimpleForm($this->getOptions());
             if ($_SERVER['REQUEST_METHOD'] != 'POST')
                 $this->form->data($this->getInfo());
         }
@@ -170,15 +170,23 @@ class PluginManager {
             //      read all plugins
             $info = static::getInfoForPath(
                 INCLUDE_DIR . $ht['install_path'], $ht['isphar']);
+
             list($path, $class) = explode(':', $info['plugin']);
             if (!$class)
                 $class = $path;
             elseif ($ht['isphar'])
-                require_once('phar://' . INCLUDE_DIR . $ht['install_path']
+                @include_once('phar://' . INCLUDE_DIR . $ht['install_path']
                     . '/' . $path);
             else
-                require_once(INCLUDE_DIR . $ht['install_path']
+                @include_once(INCLUDE_DIR . $ht['install_path']
                     . '/' . $path);
+
+            if (!class_exists($class)) {
+                $class = 'DefunctPlugin';
+                $ht['isactive'] = false;
+                $info = array('name' => $ht['name'] . ' '. __('(defunct — missing)'));
+            }
+
             if ($ht['isactive']) {
                 static::$plugin_list[$ht['install_path']]
                     = new $class($ht['id']);
@@ -277,7 +285,9 @@ class PluginManager {
         if (!isset(static::$plugin_info[$install_path])) {
             // plugin.php is require to return an array of informaiton about
             // the plugin.
-            $info = array_merge($defaults, (include $path . '/plugin.php'));
+            if (!file_exists($path . '/plugin.php'))
+                return false;
+            $info = array_merge($defaults, (@include $path . '/plugin.php'));
             $info['install_path'] = $install_path;
 
             // XXX: Ensure 'id' key isset
@@ -290,11 +300,14 @@ class PluginManager {
         static $instances = array();
         if (!isset($instances[$path])
                 && ($ps = static::allInstalled())
-                && ($ht = $ps[$path])
-                && ($info = static::getInfoForPath($path))) {
+                && ($ht = $ps[$path])) {
+
+            $info = static::getInfoForPath($path);
+
             // $ht may be the plugin instance
             if ($ht instanceof Plugin)
                 return $ht;
+
             // Usually this happens when the plugin is being enabled
             list($path, $class) = explode(':', $info['plugin']);
             if (!$class)
@@ -408,7 +421,9 @@ abstract class Plugin {
         if (!db_query($sql) || !db_affected_rows())
             return false;
 
-        $this->getConfig()->purge();
+        if ($config = $this->getConfig())
+            $config->purge();
+
         return true;
     }
 
@@ -532,26 +547,18 @@ abstract class Plugin {
             return self::VERIFY_ERROR;
         }
 
-        require_once(PEAR_DIR.'Net/DNS2.php');
         $P = new Phar($phar);
         $sig = $P->getSignature();
         $info = array();
-        try {
-            $q = new Net_DNS2_Resolver();
-            $r = $q->query(strtolower($sig['hash']) . '.' . self::$verify_domain, 'TXT');
-            foreach ($r->answer as $rec) {
-                foreach ($rec->text as $txt) {
-                    foreach (explode(';', $txt) as $kv) {
-                        list($k, $v) = explode('=', trim($kv));
-                        $info[$k] = trim($v);
-                    }
-                    if ($info['v'] && $info['s'])
-                        break;
+        if ($r = dns_get_record($sig['hash'].'.'.self::$verify_domain, DNS_TXT)) {
+            foreach ($r as $rec) {
+                foreach (explode(';', $rec['txt']) as $kv) {
+                    list($k, $v) = explode('=', trim($kv));
+                    $info[$k] = trim($v);
                 }
+                if ($info['v'] && $info['s'])
+                    break;
             }
-        }
-        catch (Net_DNS2_Exception $e) {
-            // TODO: Differenciate NXDOMAIN and DNS failure
         }
 
         if (is_array($info) && isset($info['v'])) {
@@ -689,4 +696,11 @@ abstract class Plugin {
     }
 }
 
+class DefunctPlugin extends Plugin {
+    function bootstrap() {}
+
+    function enable() {
+        return false;
+    }
+}
 ?>
