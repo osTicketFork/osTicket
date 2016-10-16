@@ -87,6 +87,11 @@ class Signal {
      * originating context.
      */
     static function send($signal, $object, &$data=null) {
+    	ob_start();
+    	var_dump(Array('signal' => $signal, 'object' => $object, 'data' => $data));
+    	$content = ob_get_contents();
+    	ob_end_clean();
+    	//error_log($content);
         if (!isset(self::$subscribers[$signal]))
             return;
         foreach (self::$subscribers[$signal] as $sub) {

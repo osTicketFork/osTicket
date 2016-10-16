@@ -1356,6 +1356,14 @@ implements RestrictedAccess, Threadable {
             );
             $email->sendAutoReply($this->getOwner(), $msg['subj'], $msg['body'],
                 null, $options);
+            
+            // Notify collaborators also on New Ticket
+            if ($cfg->notifyCollabsONNewMessage()) {    // Check if Collaborators should be notified.
+                $this->notifyCollaborators(
+                    $message,
+                    array('signature' => ($dept && $dept->isPublic())?$dept->getSignature():'')
+                );
+            }
         }
 
         // Send alert to out sleepy & idle staff.
@@ -1611,7 +1619,8 @@ implements RestrictedAccess, Threadable {
             if ($message->getEmailMessageId()) {
                 $options += array(
                         'inreplyto' => $message->getEmailMessageId(),
-                        'references' => $message->getEmailReferences()
+                        'references' => $message->getEmailReferences(),
+                        'message' => $message
                         );
             }
 
@@ -2208,6 +2217,7 @@ implements RestrictedAccess, Threadable {
                         );
             } else {
                 $this->team_id = $assignee->getId();
+                $this->staff_id = 0;
                 $evd = array('team' => $assignee->getId());
             }
         } else {
