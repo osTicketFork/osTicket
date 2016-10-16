@@ -103,7 +103,7 @@ div.hr {
 <?php if ($logo = $cfg->getClientLogo()) { ?>
     <img src="cid:<?php echo $logo->getKey(); ?>" class="logo"/>
 <?php } else { ?>
-    <img src="<?php echo INCLUDE_DIR . 'fpdf/print-logo.png'; ?>" class="logo"/>
+    <img src="<?php echo ROOT_DIR . 'images/print-logo.png'; ?>" class="logo"/>
 <?php } ?>
     <div class="hr">&nbsp;</div>
     <table><tr>
