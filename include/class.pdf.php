@@ -16,7 +16,7 @@
 
 define('THIS_DIR', str_replace('\\', '/', Misc::realpath(dirname(__FILE__))) . '/'); //Include path..
 
-require_once(INCLUDE_DIR.'mpdf/mpdf.php');
+if (!class_exists("mPDF", true)) require_once(INCLUDE_DIR.'mpdf/mpdf.php');
 
 class mPDFWithLocalImages extends mPDF {
     function WriteHtml($html) {
