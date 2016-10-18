@@ -1612,15 +1612,15 @@ implements RestrictedAccess, Threadable {
             $msg = $this->replaceVars($msg->asArray(),
                 array(
                     'recipient' => $user,
-                    'signature' => ($dept && $dept->isPublic())?$dept->getSignature():''
+                    'signature' => ($dept && $dept->isPublic())?$dept->getSignature():'',
+                    'message' => $message
                 )
             );
             $options = array('thread' => $message);
             if ($message->getEmailMessageId()) {
                 $options += array(
                         'inreplyto' => $message->getEmailMessageId(),
-                        'references' => $message->getEmailReferences(),
-                        'message' => $message
+                        'references' => $message->getEmailReferences()
                         );
             }
 
