@@ -736,7 +736,7 @@ class Format {
         # Convert to utf-8 since it's the encoding scheme for the database.
         $charset = ($always_convert) ? 'iso-8859-1' : false;
         foreach ($parameters as $p) {
-            list($param, $value) = explode('=', $extra);
+            list($param, $value) = explode('=', $p);
             if ($param == 'charset')
                 $charset = $value;
             elseif ($param == 'base64')
